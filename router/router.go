@@ -18,7 +18,7 @@ func NewRouter(UserController *controller.UserController) *gin.Engine {
 		ctx.JSON(http.StatusOK, "welcome home")
 	})
 	baseRouter := router.Group("/api")
-	UserRouter := baseRouter.Group("/User")
+	UserRouter := baseRouter.Group("/users")
 	UserRouter.GET("", UserController.FindAll)
 	UserRouter.GET("/:tagId", UserController.FindById)
 	UserRouter.POST("", UserController.Create)
