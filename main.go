@@ -13,9 +13,9 @@ import (
 	"gitlab.com/kiplagatcollins/flowershop/service"
 )
 
-// @title 	Tag Service API
+// @title 	Farmer Shop Service API
 // @version	1.0
-// @description A Tag service API in Go using Gin framework
+// @description Farmer Shop Service API in Go using Gin framework
 
 // @host 	localhost:8888
 // @BasePath /api

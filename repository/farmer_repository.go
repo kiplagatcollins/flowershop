@@ -45,7 +45,6 @@ func (r *FarmerRepositoryImpl) Delete(farmerID int) error {
 func (r *FarmerRepositoryImpl) FindAll() ([]model.Farmer, error) {
 	var farmers []model.Farmer
 	result := r.Db.Preload("User").Find(&farmers)
-	r.Db.Preload("User").First(&farmers)
 	if result.Error != nil {
 		return nil, result.Error
 	}
