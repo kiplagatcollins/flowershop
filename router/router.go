@@ -9,7 +9,7 @@ import (
 	"gitlab.com/kiplagatcollins/flowershop/controller"
 )
 
-func NewRouter(UserController *controller.UserController) *gin.Engine {
+func NewRouter(userController *controller.UserController, farmerController *controller.FarmerController) *gin.Engine {
 	router := gin.Default()
 	// add swagger
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -18,12 +18,21 @@ func NewRouter(UserController *controller.UserController) *gin.Engine {
 		ctx.JSON(http.StatusOK, "welcome home")
 	})
 	baseRouter := router.Group("/api")
+	// Users routes
 	UserRouter := baseRouter.Group("/users")
-	UserRouter.GET("", UserController.FindAll)
-	UserRouter.GET("/:tagId", UserController.FindById)
-	UserRouter.POST("", UserController.Create)
-	UserRouter.PATCH("/:tagId", UserController.Update)
-	UserRouter.DELETE("/:tagId", UserController.Delete)
+	UserRouter.GET("", userController.FindAll)
+	UserRouter.GET("/:userId", userController.FindById)
+	UserRouter.POST("", userController.Create)
+	UserRouter.PATCH("/:userId", userController.Update)
+	UserRouter.DELETE("/:userId", userController.Delete)
+
+	// Users routes
+	FarmerRouter := baseRouter.Group("/farmers")
+	FarmerRouter.GET("", farmerController.FindAll)
+	FarmerRouter.GET("/:farmerId", farmerController.FindById)
+	FarmerRouter.POST("", farmerController.Create)
+	FarmerRouter.PATCH("/:farmerId", farmerController.Update)
+	FarmerRouter.DELETE("/:farmerId", farmerController.Delete)
 
 	return router
 }
