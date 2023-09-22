@@ -7,7 +7,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/kiplagatcollins/flowershop/config"
 	"gitlab.com/kiplagatcollins/flowershop/controller"
-	"gitlab.com/kiplagatcollins/flowershop/helper"
 	"gitlab.com/kiplagatcollins/flowershop/model"
 	"gitlab.com/kiplagatcollins/flowershop/repository"
 	"gitlab.com/kiplagatcollins/flowershop/router"
@@ -30,16 +29,19 @@ func main() {
 	db.Table("user").AutoMigrate(&model.User{})
 
 	// Repository
-	userRepository := repository.NewUserREpositoryImpl(db)
+	userRepository := repository.NewUserRepositoryImpl(db)
+	farmerRepository := repository.NewFarmerRepositoryImpl(db)
 
 	// Service
 	userService := service.NewUserServiceImpl(userRepository, validate)
+	farmerService := service.NewFarmerServiceImpl(farmerRepository, validate)
 
 	// Controller
 	userController := controller.NewUserController(userService)
+	farmerController := controller.NewFarmerController(farmerService)
 
 	// Router
-	routes := router.NewRouter(userController)
+	routes := router.NewRouter(userController, farmerController)
 
 	server := &http.Server{
 		Addr:    ":8888",
@@ -47,5 +49,5 @@ func main() {
 	}
 
 	err := server.ListenAndServe()
-	helper.ErrorPanic(err)
+	panic(err.Error())
 }
