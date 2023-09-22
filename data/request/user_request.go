@@ -1,10 +1,24 @@
 package request
 
 type CreateUserRequest struct {
-	Name string `validate:"required,min=1,max=200" json:"name"`
+	Username    string `validate:"required,max=200,min=1" json:"username"`
+	FirstName   string `validate:"required,max=200,min=1" json:"firstName"`
+	LastName    string `validate:"required,max=200,min=1" json:"lastName"`
+	Email       string `validate:"required,max=200,min=1" json:"email"`
+	Address     string `validate:"required,max=200,min=1" json:"address"`
+	PhoneNumber string `validate:"required,max=200,min=1" json:"phoneNumber"`
+	DOB         string `validate:"required,max=200,min=1" json:"dob"`
+	Role        string `validate:"required,max=200,min=1" json:"role"`
 }
 
 type UpdateUserRequest struct {
-	Id   int    `validate:"required"`
-	Name string `validate:"required,max=200,min=1" json:"name"`
+	Id          int    `validate:"required"`
+	Username    string `validate:"required,max=200,min=1" json:"username"`
+	FirstName   string `validate:"required,max=200,min=1" json:"firstName"`
+	LastName    string `validate:"required,max=200,min=1" json:"lastName"`
+	Email       string `validate:"required,max=200,min=1" json:"email"`
+	Address     string `validate:"required,max=200,min=1" json:"address"`
+	PhoneNumber string `validate:"required,max=200,min=1" json:"phoneNumber"`
+	DOB         string `validate:"required,max=200,min=1" json:"dob"`
+	Role        string `validate:"required,max=200,min=1" json:"role"`
 }

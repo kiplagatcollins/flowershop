@@ -6,7 +6,6 @@ import (
 
 	"gitlab.com/kiplagatcollins/flowershop/data/request"
 	"gitlab.com/kiplagatcollins/flowershop/data/response"
-	"gitlab.com/kiplagatcollins/flowershop/helper"
 	"gitlab.com/kiplagatcollins/flowershop/service"
 
 	"github.com/gin-gonic/gin"
@@ -23,154 +22,97 @@ func NewUserController(service service.UserService) *UserController {
 	}
 }
 
-// @Summary 		Create User User
-// @Description 	Create User User details
-// @Tags 			User
-// @Accept 			json
-// @Produce 		json
-// @Param 			input body request.CreateUserRequest true "request.CreateUserRequest details"
-// @Success 		200 {object} response.Response{data=model.User} "Successfully retrieved user"
-// @Failure 		400 {object} response.Response "Bad request"
-// @Failure 		401 {object} response.Response "Unauthorized"
-// @Failure 		404 {object} response.Response "User not found"
-// @Failure 		409 {object} response.Response "Conflict"
-// @Failure 		500 {object} response.Response "Internal server error"
-// @Router 			/users [post]
+// Create handles the creation of a new user.
 func (controller *UserController) Create(ctx *gin.Context) {
 	log.Info().Msg("create User")
 	createUserRequest := request.CreateUserRequest{}
-	err := ctx.ShouldBindJSON(&createUserRequest)
-	helper.ErrorPanic(err)
-
-	controller.UserService.Create(createUserRequest)
-	webResponse := response.Response{
-		Code:   http.StatusOK,
-		Status: "Ok",
-		Data:   nil,
+	if err := ctx.ShouldBindJSON(&createUserRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, response.Response{Code: http.StatusBadRequest, Status: "Bad request", Data: err.Error()})
+		return
 	}
-	ctx.Header("Content-Type", "application/json")
-	ctx.JSON(http.StatusOK, webResponse)
+
+	if err := controller.UserService.Create(createUserRequest); err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.Response{Code: http.StatusInternalServerError, Status: "Internal server error", Data: err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response.Response{Code: http.StatusOK, Status: "Ok", Data: nil})
 }
 
-// UpdateUser		godoc
-// @Summary 		Update User
-// @Description 	Get products based on agent and customer details
-// @Tags 			User
-// @Accept 			application/json
-// @Produce 		application/json
-// @Param 			input body request.UpdateUserRequest true "request.UpdateUserRequest details"
-// @Success 		200 {object} response.Response{data=model.User} "Successfully retrieved user"
-// @Failure 		400 {object} response.Response "Bad request"
-// @Failure 		401 {object} response.Response "Unauthorized"
-// @Failure 		404 {object} response.Response "User not found"
-// @Failure 		409 {object} response.Response "Conflict"
-// @Failure 		500 {object} response.Response "Internal server error"
-// @Router			/users/userId} [patch]
+// Update handles updating user details.
 func (controller *UserController) Update(ctx *gin.Context) {
 	log.Info().Msg("update User")
 	updateUserRequest := request.UpdateUserRequest{}
-	err := ctx.ShouldBindJSON(&updateUserRequest)
-	helper.ErrorPanic(err)
+	if err := ctx.ShouldBindJSON(&updateUserRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, response.Response{Code: http.StatusBadRequest, Status: "Bad request", Data: err.Error()})
+		return
+	}
 
-	tagId := ctx.Param("tagId")
-	id, err := strconv.Atoi(tagId)
-	helper.ErrorPanic(err)
+	userId := ctx.Param("userId")
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, response.Response{Code: http.StatusBadRequest, Status: "Bad request", Data: err.Error()})
+		return
+	}
 	updateUserRequest.Id = id
 
-	controller.UserService.Update(updateUserRequest)
-
-	webResponse := response.Response{
-		Code:   http.StatusOK,
-		Status: "Ok",
-		Data:   nil,
+	if err := controller.UserService.Update(updateUserRequest); err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.Response{Code: http.StatusInternalServerError, Status: "Internal server error", Data: err.Error()})
+		return
 	}
-	ctx.Header("Content-Type", "application/json")
-	ctx.JSON(http.StatusOK, webResponse)
+
+	ctx.JSON(http.StatusOK, response.Response{Code: http.StatusOK, Status: "Ok", Data: nil})
 }
 
-// DeleteUser 		godoc
-// @Summary			Get Single User by id.
-// @Description 	Return the user whoes userId value mathes id.
-// @Tags 			User
-// @Accept 			application/json
-// @Produce     	application/json
-// @Success 		200 {object} response.Response{data=model.User} "Successfully retrieved user"
-// @Failure 		400 {object} response.Response "Bad request"
-// @Failure 		401 {object} response.Response "Unauthorized"
-// @Failure 		404 {object} response.Response "User not found"
-// @Failure 		409 {object} response.Response "Conflict"
-// @Failure 		500 {object} response.Response "Internal server error"
-// @Router			/users/{userId} [delete]
+// Delete handles deleting a user by ID.
 func (controller *UserController) Delete(ctx *gin.Context) {
 	log.Info().Msg("delete User")
-	tagId := ctx.Param("tagId")
-	id, err := strconv.Atoi(tagId)
-	helper.ErrorPanic(err)
-	controller.UserService.Delete(id)
-
-	webResponse := response.Response{
-		Code:   http.StatusOK,
-		Status: "Ok",
-		Data:   nil,
+	userId := ctx.Param("userId")
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, response.Response{Code: http.StatusBadRequest, Status: "Bad request", Data: err.Error()})
+		return
 	}
-	ctx.Header("Content-Type", "application/json")
-	ctx.JSON(http.StatusOK, webResponse)
+
+	if err := controller.UserService.Delete(id); err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.Response{Code: http.StatusInternalServerError, Status: "Internal server error", Data: err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response.Response{Code: http.StatusOK, Status: "Ok", Data: nil})
 }
 
-// FindByIdUser 	godoc
-// @Summary 		Get Single User by ID
-// @Description 	Returns the user whose userID matches the provided ID.
-// @Tags 			User
-// @Accept 			json
-// @Produce 		json
-// @Param 			userId path int true "User ID to fetch"
-// @Success 		200 {object} response.Response{data=model.User} "Successfully retrieved user"
-// @Failure 		400 {object} response.Response "Bad request"
-// @Failure 		401 {object} response.Response "Unauthorized"
-// @Failure 		404 {object} response.Response "User not found"
-// @Failure 		409 {object} response.Response "Conflict"
-// @Failure 		500 {object} response.Response "Internal server error"
-// @Router 			/users/{userId} [get]
+// FindById returns a single user by ID.
 func (controller *UserController) FindById(ctx *gin.Context) {
-
 	log.Info().Msg("findbyid User")
-	tagId := ctx.Param("tagId")
-	id, err := strconv.Atoi(tagId)
-	helper.ErrorPanic(err)
-
-	userResponse := controller.UserService.FindById(id)
-
-	webResponse := response.Response{
-		Code:   http.StatusOK,
-		Status: "Ok",
-		Data:   userResponse,
+	userId := ctx.Param("userId")
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, response.Response{Code: http.StatusBadRequest, Status: "Bad request", Data: err.Error()})
+		return
 	}
-	ctx.Header("Content-Type", "application/json")
-	ctx.JSON(http.StatusOK, webResponse)
+
+	userResponse, err := controller.UserService.FindById(id)
+	if err != nil {
+		if err.Error() == service.ErrUserNotFound.Error() {
+			ctx.JSON(http.StatusNotFound, response.Response{Code: http.StatusNotFound, Status: "User not found", Data: err.Error()})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, response.Response{Code: http.StatusInternalServerError, Status: "Internal server error", Data: err.Error()})
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response.Response{Code: http.StatusOK, Status: "Ok", Data: userResponse})
 }
 
-// FindAllUser 		godoc
-// @Summary Get Occupations
-// @Description Get Occupations based on agent and customer details
-// @Tags User
-// @Accept json
-// @Produce json
-// @Success 200 {object} response.Response{data=[]model.User} "Successfully retrieved user"
-// @Failure 400 {object} response.Response "Bad request"
-// @Failure 401 {object} response.Response "Unauthorized"
-// @Failure 404 {object} response.Response "User not found"
-// @Failure 409 {object} response.Response "Conflict"
-// @Failure 500 {object} response.Response "Internal server error"
-// @Router /users [get]
+// FindAll returns a list of all users.
 func (controller *UserController) FindAll(ctx *gin.Context) {
 	log.Info().Msg("findAll User")
-	usersResponse := controller.UserService.FindAll()
-	webResponse := response.Response{
-		Code:   http.StatusOK,
-		Status: "Ok",
-		Data:   usersResponse,
+	usersResponse, err := controller.UserService.FindAll()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.Response{Code: http.StatusInternalServerError, Status: "Internal server error", Data: err.Error()})
+		return
 	}
-	ctx.Header("Content-Type", "application/json")
-	ctx.JSON(http.StatusOK, webResponse)
 
+	ctx.JSON(http.StatusOK, response.Response{Code: http.StatusOK, Status: "Ok", Data: usersResponse})
 }

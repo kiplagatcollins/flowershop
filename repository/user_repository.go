@@ -3,66 +3,63 @@ package repository
 import (
 	"errors"
 
-	"gitlab.com/kiplagatcollins/flowershop/data/request"
-	"gitlab.com/kiplagatcollins/flowershop/helper"
 	"gitlab.com/kiplagatcollins/flowershop/model"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	Save(User model.User)
-	Update(User model.User)
-	Delete(UserId int)
-	FindById(UserId int) (User model.User, err error)
-	FindAll() []model.User
+	Save(user model.User) error
+	Update(user model.User) error
+	Delete(userID int) error
+	FindById(userID int) (model.User, error)
+	FindAll() ([]model.User, error)
 }
 
 type UserRepositoryImpl struct {
 	Db *gorm.DB
 }
 
-func NewUserREpositoryImpl(Db *gorm.DB) UserRepository {
-	return &UserRepositoryImpl{Db: Db}
-}
-
-// Delete implements UserRepository
-func (t *UserRepositoryImpl) Delete(UserId int) {
-	var User model.User
-	result := t.Db.Where("id = ?", UserId).Delete(&User)
-	helper.ErrorPanic(result.Error)
-}
-
-// FindAll implements UserRepository
-func (t *UserRepositoryImpl) FindAll() []model.User {
-	var User []model.User
-	result := t.Db.Find(&User)
-	helper.ErrorPanic(result.Error)
-	return User
-}
-
-// FindById implements UserRepository
-func (t *UserRepositoryImpl) FindById(UserId int) (User model.User, err error) {
-	var tag model.User
-	result := t.Db.Find(&tag, UserId)
-	if result != nil {
-		return tag, nil
-	} else {
-		return tag, errors.New("tag is not found")
-	}
+func NewUserRepositoryImpl(db *gorm.DB) UserRepository {
+	return &UserRepositoryImpl{Db: db}
 }
 
 // Save implements UserRepository
-func (t *UserRepositoryImpl) Save(User model.User) {
-	result := t.Db.Create(&User)
-	helper.ErrorPanic(result.Error)
+func (r *UserRepositoryImpl) Save(user model.User) error {
+	result := r.Db.Create(&user)
+	return result.Error
 }
 
 // Update implements UserRepository
-func (t *UserRepositoryImpl) Update(User model.User) {
-	var updateTag = request.UpdateUserRequest{
-		Id:   User.Id,
-		Name: User.Name,
+func (r *UserRepositoryImpl) Update(user model.User) error {
+	result := r.Db.Save(&user)
+	return result.Error
+}
+
+// Delete implements UserRepository
+func (r *UserRepositoryImpl) Delete(userID int) error {
+	result := r.Db.Delete(&model.User{}, userID)
+	return result.Error
+}
+
+// FindAll implements UserRepository
+func (r *UserRepositoryImpl) FindAll() ([]model.User, error) {
+	var users []model.User
+	result := r.Db.Find(&users)
+	if result.Error != nil {
+		return nil, result.Error
 	}
-	result := t.Db.Model(&User).Updates(updateTag)
-	helper.ErrorPanic(result.Error)
+	return users, nil
+}
+
+// FindById implements UserRepository
+func (r *UserRepositoryImpl) FindById(userID int) (model.User, error) {
+	var user model.User
+	result := r.Db.First(&user, userID)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return model.User{}, errors.New("user not found")
+		}
+		return model.User{}, result.Error
+	}
+	return user, nil
 }
